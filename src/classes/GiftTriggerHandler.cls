@@ -4,6 +4,18 @@ public without sharing class GiftTriggerHandler {
 		updateOwnerIdByAffliate(newGiftList);
 	}
 
+	public void onBeforeUpdate(List<causeview__Gift__c> newGiftList, Map<Id, causeview__Gift__c> oldGiftMap) {
+		List<causeview__Gift__c> giftAffiliateChangeList = new List<causeview__Gift__c>();
+		for(causeview__Gift__c gift : newGiftList) {
+			if(gift.Affiliate__c != oldGiftMap.get(gift.Id).Affiliate__c) {
+				giftAffiliateChangeList.add(gift);
+			}
+		}
+		if(!giftAffiliateChangeList.isEmpty()) {
+			updateOwnerIdByAffliate(giftAffiliateChangeList);
+		}
+	}
+
 	private void updateOwnerIdByAffliate(List<causeview__Gift__c> newGiftList) {
 		System.debug('mlh line 8');
 		Set<String> affliliateNameSet = new Set<String>();
