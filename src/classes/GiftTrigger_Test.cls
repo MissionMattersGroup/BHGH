@@ -1,34 +1,92 @@
 @isTest(SeeAllData = true)
 public class GiftTrigger_Test {
 
+	class TestFactory {
+
+		Integer recordCount { get; set; }
+		List<String> affiliateNameList { get; set; }
+		List<causeview__Gift__c> testGiftList { get; set; }
+		Map<String, String> emailAddressByAffiliateMap { get; set; }
+		Map<String, Id> userIdByAffiliateMap { get; set; }
+
+		TestFactory(Integer count) {
+			recordCount = count;
+			setAffiliateNameList();
+			setTestGiftList();
+		}
+
+		public Map<Id, causeview__Gift__c> getTestGiftMap() {
+			insert testGiftList;
+			return new Map<Id, causeview__Gift__c>(testGiftList);
+		}
+
+		public List<causeview__Gift__c> getTestGiftList() {
+			return testGiftList;
+		}
+
+		public List<String> getAffiliateList() {
+			return affiliateNameList;
+		}
+
+		public void setAffiliateNameList() {
+			emailAddressByAffiliateMap = new Map<String, String>();
+			userIdByAffiliateMap = new Map<String, Id>();
+			affiliateNameList = new List<String>();
+			Integer count = 1;
+			List<User> userList = [SELECT Id FROM User WHERE IsActive = true AND ProfileId IN (SELECT Id FROM Profile WHERE UserLicense.Name = 'Salesforce') LIMIT :recordCount];
+			List<Affiliate__c> testAffiliateList = (List<Affiliate__c>)SmartFactory.createSObjectList('Affiliate__c', false, recordCount);
+			for(Integer i=0; i<recordCount; i++) {
+				testAffiliateList[i].Affiliate_Name__c = 'test affiliate ' + String.valueOf(count);
+				testAffiliateList[i].Email_Address__c = 'testAffiliate' + String.valueOf(count) + '@test.com';
+				testAffiliateList[i].User__c = userList[i].Id;
+				emailAddressByAffiliateMap.put(testAffiliateList[i].Affiliate_Name__c, testAffiliateList[i].Email_Address__c);
+				affiliateNameList.add(testAffiliateList[i].Affiliate_Name__c);
+				count++;
+			}
+			insert testAffiliateList;
+			for(Integer i=0; i<userList.size(); i++) {
+				if(!userIdByAffiliateMap.containsKey(testAffiliateList[i].Affiliate_Name__c)) {
+					userIdByAffiliateMap.put(testAffiliateList[i].Affiliate_Name__c, userList[i].Id);
+				}
+			}
+		}
+
+		public void setTestGiftList() {
+			Account testAccount = (Account)SmartFactory.createSObject('Account', false);
+			testAccount.Name = 'GiftTrigger_Test testUpdateOwnerByAffiliate';
+			insert testAccount;
+			Contact testContact = (Contact)SmartFactory.createSObject('Contact', false);
+			testContact.AccountId = testAccount.Id;
+			insert testContact;
+			testGiftList = (List<causeview__Gift__c>)SmartFactory.createSObjectList('causeview__Gift__c', false, recordCount);
+			for(Integer i=0; i<testGiftList.size(); i++) {
+				testGiftList[i].Affiliate__c = affiliateNameList[i];
+				testGiftList[i].causeview__Constituent__c = testContact.Id;
+				testGiftList[i].causeview__Expected_Amount__c = 500.00;
+			}
+			testGiftList.add(testGiftList[0].clone());
+		}
+	}
+
+	@isTest
+	static void testUpdateaffiliateEmailInsert() {
+		Test.startTest();
+		TestFactory factory = new TestFactory(10);
+		Map<Id, causeview__Gift__c> testGiftMap = factory.getTestGiftMap();
+		for(causeview__Gift__c testGift : [SELECT Id, OwnerId, Affiliate__c, Affiliate_Reply_To_Email__c FROM causeview__Gift__c WHERE Id IN :testGiftMap.keySet()]) {
+			System.assert(factory.emailAddressByAffiliateMap.get(testGift.Affiliate__c).equalsIgnoreCase(testGift.Affiliate_Reply_To_Email__c));
+		}
+		Test.stopTest();
+	}
+
 	@isTest
 	static void testUpdateOwnerByAffiliateOnInsert() {
 		Test.startTest();
-		Set<String> affliliateNameSet = new Set<String>();
-		Map<String, Id> userIdByAffiliateMap = new Map<String, Id>();
-		for(User u : [SELECT Id, CompanyName FROM User WHERE CompanyName != '' AND IsActive = true LIMIT 200]) {
-			if(!userIdByAffiliateMap.containsKey(u.CompanyName)) {
-				userIdByAffiliateMap.put(u.CompanyName, u.Id);
-			}
-		}
-		List<String> affliliateNameList = new List<String>(userIdByAffiliateMap.keySet());
-		Account testAccount = (Account)SmartFactory.createSObject('Account', false);
-		testAccount.Name = 'GiftTrigger_Test testUpdateOwnerByAffiliate';
-		insert testAccount;
-		Contact testContact = (Contact)SmartFactory.createSObject('Contact', false);
-		testContact.AccountId = testAccount.Id;
-		insert testContact;
-		List<causeview__Gift__c> testGiftList = (List<causeview__Gift__c>)SmartFactory.createSObjectList('causeview__Gift__c', false, affliliateNameList.size());
-		for(Integer i=0; i<affliliateNameList.size(); i++) {
-			testGiftList[i].Affiliate__c = affliliateNameList[i];
-			testGiftList[i].causeview__Constituent__c = testContact.Id;
-			testGiftList[i].causeview__Expected_Amount__c = 500.00;
-		}
-		testGiftList.add(testGiftList[0].clone());
-		insert testGiftList;
-		testGiftList = [SELECT Id, OwnerId, Affiliate__c FROM causeview__Gift__c WHERE Id IN :new Map<Id, causeview__Gift__c>(testGiftList).keySet()];
+		TestFactory factory = new TestFactory(10);
+		Map<Id, causeview__Gift__c> testGiftMap = factory.getTestGiftMap();
+		List<causeview__Gift__c> testGiftList = [SELECT Id, OwnerId, Affiliate__c FROM causeview__Gift__c WHERE Id IN :testGiftMap.keySet()];
 		for(causeview__Gift__c testGift : testGiftList) {
-			System.assertEquals(userIdByAffiliateMap.get(testGift.Affiliate__c), testGift.OwnerId);
+			System.assertEquals(factory.userIdByAffiliateMap.get(testGift.Affiliate__c), testGift.OwnerId);
 		}
 		Test.stopTest();
 	}
@@ -36,36 +94,17 @@ public class GiftTrigger_Test {
 	@isTest
 	static void testUpdateOwnerByAffiliateOnUpdate() {
 		Test.startTest();
-		Set<String> affliliateNameSet = new Set<String>();
-		Map<String, Id> userIdByAffiliateMap = new Map<String, Id>();
-		for(User u : [SELECT Id, CompanyName FROM User WHERE CompanyName != '' AND IsActive = true LIMIT 200]) {
-			if(!userIdByAffiliateMap.containsKey(u.CompanyName)) {
-				userIdByAffiliateMap.put(u.CompanyName, u.Id);
-			}
+		TestFactory factory = new TestFactory(10);
+		Map<Id, causeview__Gift__c> testGiftMap = factory.getTestGiftMap();
+		Integer counter = factory.affiliateNameList.size()-1;
+		for(causeview__Gift__c testGift : testGiftMap.values()) {
+			testGift.Affiliate__c = factory.affiliateNameList[counter];
+			counter = counter > 0 ? counter - 1 : 0;
 		}
-		List<String> affliliateNameList = new List<String>(userIdByAffiliateMap.keySet());
-		Account testAccount = (Account)SmartFactory.createSObject('Account', false);
-		testAccount.Name = 'GiftTrigger_Test testUpdateOwnerByAffiliate';
-		insert testAccount;
-		Contact testContact = (Contact)SmartFactory.createSObject('Contact', false);
-		testContact.AccountId = testAccount.Id;
-		insert testContact;
-		List<causeview__Gift__c> testGiftList = (List<causeview__Gift__c>)SmartFactory.createSObjectList('causeview__Gift__c', false, affliliateNameList.size());
-		for(Integer i=0; i<affliliateNameList.size(); i++) {
-			testGiftList[i].Affiliate__c = affliliateNameList[i];
-			testGiftList[i].causeview__Constituent__c = testContact.Id;
-			testGiftList[i].causeview__Expected_Amount__c = 500.00;
-		}
-		insert testGiftList;
-		Integer counter = affliliateNameList.size()-1;
+		update testGiftMap.values();
+		List<causeview__Gift__c> testGiftList = [SELECT Id, OwnerId, Affiliate__c FROM causeview__Gift__c WHERE Id IN :testGiftMap.keySet()];
 		for(causeview__Gift__c testGift : testGiftList) {
-			testGift.Affiliate__c = affliliateNameList[counter];
-			counter--;
-		}
-		update testGiftList;
-		testGiftList = [SELECT Id, OwnerId, Affiliate__c FROM causeview__Gift__c WHERE Id IN :new Map<Id, causeview__Gift__c>(testGiftList).keySet()];
-		for(causeview__Gift__c testGift : testGiftList) {
-			System.assertEquals(userIdByAffiliateMap.get(testGift.Affiliate__c), testGift.OwnerId);
+			System.assertEquals(factory.userIdByAffiliateMap.get(testGift.Affiliate__c), testGift.OwnerId);
 		}
 		Test.stopTest();
 	}
