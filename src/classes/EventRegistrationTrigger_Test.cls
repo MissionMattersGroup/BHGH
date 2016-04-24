@@ -29,16 +29,16 @@ public with sharing class EventRegistrationTrigger_Test {
 
 		public void setAffiliateList() {
 			emailAddressByAffiliateMap = new Map<String, String>();
-			List<Reply_To__c> testReplyToList = (List<Reply_To__c>)SmartFactory.createSObjectList('Reply_To__c', false, recordCount);
+			List<Affiliate__c> testaffiliateList = (List<Affiliate__c>)SmartFactory.createSObjectList('Affiliate__c', false, recordCount);
 			Integer count = 1;
-			for(Reply_To__c replyTo : testReplyToList) {
-				replyTo.Affiliate_Name__c = 'test affiliate ' + String.valueOf(count);
-				replyTo.Email_Address__c = 'testAffiliate' + String.valueOf(count) + '@test.com';
+			for(Affiliate__c affiliate : testaffiliateList) {
+				affiliate.Affiliate_Name__c = 'test affiliate ' + String.valueOf(count);
+				affiliate.Email_Address__c = 'testAffiliate' + String.valueOf(count) + '@test.com';
 				count++;
 			}
-			insert testReplyToList;
-			for(Reply_To__c replyTo : testReplyToList) {
-				emailAddressByAffiliateMap.put(replyTo.Affiliate_Name__c, replyTo.Email_Address__c);
+			insert testaffiliateList;
+			for(Affiliate__c affiliate : testaffiliateList) {
+				emailAddressByAffiliateMap.put(affiliate.Affiliate_Name__c, affiliate.Email_Address__c);
 			}
 			affiliateList = new List<String>(emailAddressByAffiliateMap.keySet());
 		}
@@ -58,7 +58,7 @@ public with sharing class EventRegistrationTrigger_Test {
 	}
 
 	@isTest
-	static void testUpdateReplyToAfterInsert() {
+	static void testUpdateaffiliateAfterInsert() {
 		Test.startTest();
 		TestFactory factory = new TestFactory(10);
 		Map<Id, causeview__Event_Registration__c> testRegMap = factory.getTestRegistrationMap();
@@ -69,7 +69,7 @@ public with sharing class EventRegistrationTrigger_Test {
 	}
 
 	@isTest
-	static void testUpdateReplyToAfterUpdate() {
+	static void testUpdateaffiliateAfterUpdate() {
 		Test.startTest();
 		TestFactory factory = new TestFactory(10);
 		List<causeview__Event_Registration__c> testRegList = factory.getTestRegistrationMap().values();
