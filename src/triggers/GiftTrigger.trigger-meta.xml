@@ -3,7 +3,7 @@
     <apiVersion>34.0</apiVersion>
     <packageVersions>
         <majorNumber>2</majorNumber>
-        <minorNumber>800</minorNumber>
+        <minorNumber>810</minorNumber>
         <namespace>causeview</namespace>
     </packageVersions>
     <status>Active</status>
