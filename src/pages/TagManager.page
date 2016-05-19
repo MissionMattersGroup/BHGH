@@ -3,7 +3,12 @@
         <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"/>
         <script src="//code.jquery.com/jquery-1.10.2.js"></script>
         <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-        <script>$(function() { $( document ).tooltip(); }); </script>
+
+        <script>
+                $(function() {
+                        $( document ).tooltip();
+                });
+        </script>
 
         <apex:form >
                 <apex:pageBlock id="TagBlock">
@@ -14,13 +19,13 @@
                                 <p><apex:commandButton action="{!save}" value="Save"/></p>
 
                                 <p>
-									<a href="#" style="text-decoration:none;" title="Enter 3 or more characters to begin filtering.">
-                                        <apex:outputLabel style="font-weight:bold;" for="FilterStringInput" value="Filter Tags: "/>
-                                        <apex:inputText id="FilterStringInput" value="{!filterString}">
-                                                <apex:actionSupport event="onkeyup" action="{!updateRenderedTagMap}" rerender="TagList" />
-                                        </apex:inputText>
-                                    </a>
-                                    <apex:commandButton action="{!clearFilter}" value="Clear Filter"/>
+                                        <a href="#" style="text-decoration:none;" title="Enter 3 or more characters to begin filtering.">
+                                                <apex:outputLabel style="font-weight:bold;" for="FilterStringInput" value="Filter Tags: "/>
+                                                <apex:inputText id="FilterStringInput" value="{!filterString}">
+                                                        <apex:actionSupport event="onkeyup" action="{!updateRenderedTagMap}" rerender="TagList" />
+                                                </apex:inputText>
+                                        </a>
+                                        <apex:commandButton action="{!clearFilter}" value="Clear Filter"/>
                                 </p>
                         </div>
 
@@ -36,4 +41,5 @@
 
                 </apex:pageBlock>
         </apex:form>
+
 </apex:page>
