@@ -3,8 +3,6 @@ public with sharing class TagManagerController {
     public final Tag__c tag { get; set; }
     public String parentId { get; set; }
     public String objName { get; set; }
-    public Contact individual { get; set; }
-    public Account organization { get; set; }
     public String parentName {get; set; }
     public String affiliate { get; set; }
     public String filterString { get; set; }
@@ -13,7 +11,6 @@ public with sharing class TagManagerController {
     public Map<String, Boolean> tagRenderedMap { get; set; }
 
     public class TempTag {
-
         public Tag_Value__c tagValue { get; set; }
         public Boolean isChecked { get; set; }
         public Boolean isNew { get; set; }
@@ -32,7 +29,6 @@ public with sharing class TagManagerController {
         parentName = String.valueOf(Database.query('SELECT Id, Name FROM ' + objName + ' WHERE Id = \'' + parentId + '\'')[0].get('Name'));
         affiliate = [SELECT CompanyName FROM User WHERE Id = :UserInfo.getUserId()].CompanyName;
         masterTagMap = new Map<String, TempTag>();
-        existingTagMap = new Map<String, Tag__c>();
         existingTagMap = new Map<String, Tag__c>();
         tagRenderedMap = new Map<String, Boolean>();
         for(Tag_Value__c tag : [SELECT Id, Name FROM Tag_Value__c]) {
