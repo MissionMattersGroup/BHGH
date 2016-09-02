@@ -1,0 +1,85 @@
+<apex:page showheader="true" sidebar="false">
+<!-- You can edit the overall style here: -->
+<style>
+h1
+{
+text-align:center;
+color:#067c7e;
+font-size: 3em;
+}
+
+h2
+{
+text-align:center;
+color:;
+font-size: 2em
+}
+
+p.padding
+{
+padding-left: 2cm;
+}
+
+p.padding2
+{
+padding-left: 3cm;
+}
+
+div9
+{
+    border: 2px solid #a1a1a1;
+    padding: 25px 200px; 
+    background: #f2f2f2;
+    width: 300px;
+    border-radius: 25px;
+}
+
+p
+{
+font-size:120%
+}
+</style>
+
+<!-- This is the Introductory Header: -->  
+<br>
+<div align="center">
+<div9>
+<h1>Ready to Get Started?</h1>
+</div9>
+</div>
+</br>    
+<!-- Here is where the manin text comes in: -->  
+<br></br>
+<br></br>
+
+<br>
+<div align="center"><h2>Never submitted a MMG Help Ticket before? No worries! We can take you through the basics...</h2></div>
+</br>
+<apex:pageBlock >
+<div10 style="text-align: center;">
+
+<br><p>If you don't want to have to read all this, just watch our walk-through video!</p></br>
+
+<!-- Here is the on-screen video display: -->
+<div align="center">
+<apex:iframe width="560" height="315" src="https://www.youtube.com/embed/7rY9m8ZUCbM" frameborder="0"></apex:iframe>
+</div>
+
+</div10>
+</apex:pageBlock>
+
+<p>But since you've obviously kept reading on, please follow the next couple of steps very carefully...</p>
+<p class="padding"> <b>Step 1. </b> Before you even submit your first Help Ticket, you will need to sign up for the MMG Service Desk.</p>
+<p class="padding2"> Click on the "Sign up for an account" hyperlink and set up your username and password.</p>
+<p class="padding2">(This can be the same as your Salesforce login information to keep things simple).</p>
+<p class="padding"> <b>Step 2.</b> Login with your new username and password.</p>
+<p class="padding2"> Super-Secret-Special-Ninja-Trick: If you check the "Keep me logged in" checkbox, this will be the first and last time you should need to do this since the system will remember you the next time around!</p>
+<p class="padding"> <b>Step 3.</b> You are now in!. That wasn't too painful, right? Notice how there a lot at your fingertips:</p>
+<p class="padding2"> - If you are feeling adventurous, you can start by trying to find a solution on your own.</p>
+<p class="padding2"> - <b>System Issue:</b> Use this for times like when you keep clicking a button but nothing happens, or Salesforce keeps popping up annoying error messages.</p>
+<p class="padding2"> - <b>Feature Request:</b> Want something really cool built out that's not in your Salesforce org yet? Click "Feature Request" and describe your heart's desire!</p>
+<p class="padding2"> - <b>Reporting:</b> Can't figure out a pesky Salesforce report? Have an existing report that not's cooperating? Click "Reporting" on the left-hand side bar.</p>
+<p class="padding2"> - <b>Training:</b> Only click "Training" if you are ready to change your life forever and become a Salesforce Guru! </p> 
+<p class="padding"> <b>Step 4.</b> Now you are required to take it easy, knowing that your Help Ticket is in the hands of a trusted MMG Service Desk agent.</p>
+
+</apex:page>

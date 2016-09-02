@@ -1,0 +1,15 @@
+<!--  Page used as the inline page to display the signature in an image format -->
+<apex:page standardController="Candidate__c" >
+    <apex:form >
+    <style>
+    .styleForLabel{
+            font-size: 91% !important;
+            font-weight: bold !important;
+            margin-left: 12% !important;
+    }
+    </style>
+        <!-- Component in which the signature value [JSON value] is passed to show in image format -->
+        <div class="styleForLabel">{!$Label.BackgroundSignatureForCandidate}</div>
+        <c:SignatureComponent componentValue="{!Candidate__c.Background_Signature__c}"/>
+    </apex:form>
+</apex:page>

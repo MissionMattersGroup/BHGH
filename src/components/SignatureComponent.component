@@ -1,0 +1,38 @@
+<apex:component >
+    <!-- Js Script added in static resource to handle the signature script with heavy functionality-->
+    <apex:includeScript value="{!URLFOR($Resource.Signature, '/Signature/jquery.min.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.Signature, '/Signature/jquery-ui.js')}"/>
+    
+    <!-- Css file added from static resource -->
+    <apex:stylesheet value="{!URLFOR($Resource.Signature,'/Signature/Signature.css')}" />
+    
+    <!-- Accessed the js for displaying the signature from the static resource -->
+    <apex:includeScript value="{!URLFOR($Resource.Signature, '/Signature/excanvas.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.Signature, '/Signature/JquerySignature.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.Signature, '/Signature/JquerySignatureMin.js')}"/>
+    
+    <!-- Style to display width and height of the signature canvas -->
+    <style>
+        .kbw-signature { width: 320px; height: 180px; }
+         
+    </style>
+    
+     <!-- Attribute in which the signature value is assigned -->
+    <apex:attribute name="componentValue" description="Attribute on the component."
+                  type="String" required="required" />
+    
+    <!-- Used the blank div to display the image in the specific div -->
+    <div id="SignDisplayID" style="pointer-events: none;margin-left: 36%;"></div>
+    
+    <!-- Script to display the  -signature in image format -->
+    <script>
+        $('#SignDisplayID').signature();
+        
+        var SignatureVal = '{!componentValue}';
+        
+        if (SignatureVal != '') {
+            $('#SignDisplayID').signature('draw', SignatureVal);
+        }
+        //$('#SignDataDivID').hide();
+    </script>
+</apex:component>

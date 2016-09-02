@@ -1,0 +1,105 @@
+<!-- This Page upload the resume for contact and cover letter for requisition -->
+<apex:page controller="BHGH_UploadResume" title="Upload Resume"   
+            sidebar="false" showHeader="false" id="mainPage">
+    
+    <!-- Css file added from static resource -->
+    <apex:stylesheet value="{!URLFOR($Resource.SelectedCandidateStyle,'CssForSelectedCandidate/StatusStyleClass.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.CssForBHGH, 'BHGH/BHGH_Popup.css')}"/> 
+    <apex:stylesheet value="{!URLFOR($Resource.CssForBHGH, 'BHGH/BHGH_ResumeUpload.css')}"/> 
+    <!-- End of CSS file -->
+    
+    <style>
+        .thankYou {
+            padding-left: 20px;
+            padding-right: 30px;
+            font-weight:bold;
+            font-size: initial;
+            font-family: serif;
+            padding-top: 40px;
+            text-align: center;
+            color: green;
+        }
+    </style>
+    
+    
+    <apex:form id="theForm" >
+        <apex:outputpanel id="outerPanel">
+            
+            <apex:outputPanel id="msgPanel">
+                <apex:pageMessages id="showmsg"/>
+            </apex:outputPanel>
+            
+            <!-- outputPanel which shows Buttons to add attachments(Cover Letter and Resume) -->
+            
+            <apex:outputPanel id="uploadPB" rendered="{!showUpperPanel}">
+                <!-- Start of PageBlock -->
+                    <apex:pageblock tabStyle="contact" id="PB">
+                        
+                        <apex:outputPanel id="uploadPB1" layout="block" >
+                            <apex:pageBlockSection title="{!$Label.BHGH_UploadResume_Upload_Document_Title}" 
+                                                   id="theSection">
+
+                                <apex:outputPanel > 
+                                    <apex:outputLabel value="{!$Label.BHGH_UploadResume_Attach_Resume_Name}"
+                                                          for="file" rendered="{!displaySection}" /><br/><br/>
+                                            
+                                    <apex:pageBlockSectionItem rendered="{!displaySection}">
+                                        <apex:outputLabel value="{!$Label.BHGH_UploadResume_Attach_Resume}" for="file" />
+                                        <apex:inputFile value="{!objAttachment.body}" filename="{!objAttachment.name}" id="file"/> 
+                                    </apex:pageBlockSectionItem><br/><br/>
+                    
+                                    <apex:pageBlockSectionItem id="pbSection">
+                                        <apex:outputLabel value="{!$Label.BHGH_UploadResume_AttachCoverLetter}" for="file1"/>
+                                        <apex:inputFile value="{!objAttachmentForReq.body}" required="{!RequireCoverLetterStatus}"
+                                                                filename="{!objAttachmentForReq.name}" id="file1"/>
+                                    </apex:pageBlockSectionItem><br/><br/>
+                                </apex:outputPanel>
+
+                            </apex:pageBlockSection>
+                        </apex:outputPanel>
+                        
+                        <!-- CommandButtons to save attachments and to cancel -->
+                        <center>
+                            <apex:actionRegion id="commandBtn" renderRegionOnly="false" >
+                                <apex:commandButton id="saveAndRedirect" action="{!addCoverLetter}" value="Save" />
+                                <apex:commandButton id="cancelBtn" value="{!$Label.Cancel_Button}" action="{!cancel}"/>
+                            </apex:actionRegion>
+                        </center>
+                            
+                    </apex:pageblock>
+                </apex:outputPanel> 
+                <!-- End of outputPanel -->
+
+                <!-- outputPanel which shows Thank you message when attachments are added successfully -->
+                <apex:outputPanel id="thankYou" rendered="{!NOT(showUpperPanel)}" >
+                    <apex:outputPanel id="thankYou1" layout="block" >
+                        <apex:pageBlock >
+                            <apex:outputLabel value="You have successfully submitted your resume and cover letter for the {!coverLetterName} requisition for {!affiliateName}"
+                                                      id="oL" styleclass="thankYou"/>
+                        </apex:pageBlock>
+
+<!--                         <div class="commandButton"> -->
+<!--                             <apex:commandButton id="returnBtn" value="{!$Label.BHGH_Return_To_JobSearchPage}" action="{!returnToJobSearch}" /> -->
+<!--                         </div> -->
+                             
+                             <center>
+                             <td colspan="2">
+                                <apex:commandButton id="returnBtn" value="{!$Label.BHGH_Return_To_JobSearchPage}" action="{!returnToJobSearch}" />
+                             </td>
+                             </center>
+                                
+
+                    </apex:outputPanel>
+                </apex:outputPanel>
+                <!-- End of outputPanel -->
+         
+        </apex:outputpanel>
+       
+    </apex:form>
+<script>
+function setParam(){
+console.log('{!straffiliateID}');
+ 
+}
+</script>
+</apex:page>
