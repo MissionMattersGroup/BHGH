@@ -1,0 +1,196 @@
+<apex:page controller="JobSearchController" title="Job Search Page" sidebar="false" showHeader="false">
+	<apex:stylesheet value="{!URLFOR($Resource.SelectedCandidateStyle,'CssForSelectedCandidate/StatusStyleClass.css')}" />
+	<apex:stylesheet value="{!URLFOR($Resource.CssForBHGH, 'BHGH/BHGH_JobSearchPage.css')}" />
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" />
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+	<style>
+	    .marginLeft {
+	        margin-left: 20px;
+	    }
+		.section {
+	        margin-top: 10px;
+	    }
+	</style>
+	<body>
+    	<apex:form >
+        	<div>
+            	<apex:outputPanel >
+	                <apex:actionStatus id="statusBar" layout="block">
+	                    <apex:facet name="start">
+	                        <div id="assign-action-spinner-main">
+	                            <div id="assign-action-spinner-content">
+	                                <img src="/img/analytics/reportbuilder/icons/spinner32.gif" alt="Processing..." title="Processing..." />
+	                                <p>Processing...</p>
+	                            </div>
+	                        </div>
+	                    </apex:facet>
+	                </apex:actionStatus>
+            	</apex:outputPanel>
+            	<div class="container containerWidth">
+                	<div class="gradient2 tableMargin">
+                    	<apex:pageMessages id="showmsg" />
+	                    <div class="row">
+	                        <div class="col-sm-2 marginLeft section">
+	                            <b><apex:outputText id="outputvalue" value="{!$Label.JobSearchPage_Affiliate}" rendered="{!IF(affiliateID != null, false, true)}"/></b>
+	                        </div>
+	                        <div class="col-sm-2 section section">
+	                            <apex:outputPanel styleclass="AlignText" rendered="{!IF(affiliateID != null, false, true)}">
+	                                <apex:selectList value="{!selectedDepPicklistVal}" size="1" id="values">
+	                                    <apex:actionSupport event="onchange" reRender="pb1" />
+	                                    <apex:selectOptions value="{!Options}" />
+	                                </apex:selectList>
+	                            </apex:outputPanel>
+	                        </div>
+	                        <div class="col-sm-4"></div>
+	                        <div class="col-sm-4"></div>
+	                    </div>
+                    	<div class="row">
+	                        <div class="col-sm-2 marginLeft section">
+	                            <b><apex:outputText id="outputvalueForEmpType" value="{!$Label.JobSearchPage_Employee_Type}" /></b>
+	                        </div>
+	                        <div class="col-sm-2 section ">
+	                            <apex:outputPanel styleclass="AlignText">
+	                                <apex:selectList value="{!selectedEmpType}" size="1" id="valuesForEmp">
+	                                    <apex:actionSupport event="onchange" reRender="pb1" />
+	                                    <apex:selectOptions value="{!OptionsForEmployeeType}" />
+	                                </apex:selectList>
+	                            </apex:outputPanel>
+	                        </div>
+	                        <div class="col-sm-4"></div>
+	                        <div class="col-sm-4"></div>
+	                    </div>
+	                    <div class="row">
+	                        <div class="col-sm-2 marginLeft section ">
+	                            <b><apex:outputText id="outputvalueForLiveInOut" value="{!$Label.JobSearchPage_Live_In_Out}" /></b>
+	                        </div>
+	                        <div class="col-sm-2 section ">
+	                            <apex:outputPanel styleclass="AlignText">
+	                                <apex:selectList value="{!selectedLiveInOut}" size="1" id="valuesForLiv">
+	                                    <apex:actionSupport event="onchange" reRender="pb1" />
+	                                    <apex:selectOptions value="{!OptionsForLiveInOut}" />
+	                                </apex:selectList>
+	                            </apex:outputPanel>
+	                        </div>
+	                        <div class="col-sm-4"></div>
+	                        <div class="col-sm-4"></div>
+	                    </div>
+	                    <div class="row">
+	                        <div class="col-sm-2 marginLeft section ">
+	                            <b><apex:outputText id="outputvalueForPosition" value="{!$Label.JobSearchPage_Position_Name}" /></b>
+	                        </div>
+	                        <div class="col-sm-2 section ">
+	                            <apex:outputPanel styleclass="AlignText">
+	                                <apex:inputText id="inputvalue" value="{!inputText}" />
+	                            </apex:outputPanel>
+	                        </div>
+	                        <div class="col-sm-4"></div>
+	                        <div class="col-sm-4"></div>
+	                    </div>
+	                    <div class="row">
+	                        <center>
+	                            <apex:commandButton value="{!$Label.JobSearchPage_Search}" action="{!getSearchResultList}" status="statusBar" styleClass="AlignText" />
+	                        </center>
+	                    </div>
+                	</div>
+            	</div>
+            <apex:actionFunction name="passRequIdToController" reRender="showmsg" status="statusBar">
+                <apex:param name="RequisitionId" value="" assignTo="{!selectPositionRec}" />
+            </apex:actionFunction>
+            <div class="container containerCss">
+                <div class="table-responsive">
+                    <apex:outputPanel title="{!$Label.JobSearchPage_Job_Description_Details}" id="thePageBlock">
+                        <table class="table-bordered tablecss">
+                            <th class="theadColor" />
+                            <apex:repeat value="{!$ObjectType.Requisition__c.FieldSets.FieldsForJobSearchPage}" var="field">
+                                <apex:outputPanel rendered="{!field !='Affiliate_Name__c'}">
+                                    <th class="theadColor">{!field.label}</th>
+                                </apex:outputPanel>
+                                <apex:outputPanel rendered="{!AND(affiliateID == '', field =='Affiliate_Name__c')}">
+                                    <th class="theadColor">{!field.label}</th>
+                                </apex:outputPanel>
+                            </apex:repeat>
+                            <th class="theadColor">
+                            	{!$Label.JobSearchPage_facet_Job_Description}
+                    		</th>
+                            <th class="theadColor">
+                                {!$Label.JobSearchPage_facet_Benefits_Package}
+                            </th>
+                            <th colspan="2" class="theadColor" />
+                                <apex:repeat value="{!requisitionList}" var="sObjRec" id="theTable" >
+                                    <tr class="rowColor">
+                                        <td><input type="radio" name="selectPositionRec" onClick="setReqId('{!sObjRec.Id}');" /></td>
+                                    	<apex:repeat value="{!$ObjectType.Requisition__c.FieldSets.FieldsForJobSearchPage}" var="field">
+                                            <apex:outputPanel rendered="{!field !='Affiliate_Name__c'}">
+												<td>
+													<apex:outputField value="{!sObjRec[field]}" />
+												</td>
+                                        	</apex:outputPanel>
+                                    		<apex:outputPanel rendered="{!AND(affiliateID == '',field =='Affiliate_Name__c')}">
+                                            	<td>
+                                                	<apex:outputField value="{!sObjRec[field]}" />
+                                            	</td>
+                                            </apex:outputPanel>
+                                        </apex:repeat>
+                                        <td>
+                                        	<apex:commandButton value="{!$Label.JobSearchPage_Show_Description_Button}" action="{!showJobDescription}" rerender="tstpopup" status="statusBar" styleClass="descBtn">
+                                            	<apex:param name="reqId" value="{!sObjRec.Job_Description__c}" assignTo="{!jobDescriptionId}" />
+                                        	</apex:commandButton>
+										</td>
+                                        <td>
+                                            <apex:commandButton value="{!$Label.JobSearchPage_Show_Benefits_Button}" action="{!showBenefitPackage}" rerender="tstpopup" styleclass="descBtn" status="statusBar">
+                                                <apex:param name="reqId" value="{!sObjRec.Benefits_Package__c}" assignTo="{!benefitPackageId}" />
+                                            </apex:commandButton>
+                                        </td>
+                                    </tr>
+                                </apex:repeat>
+                            </table>
+                        	<div>
+                            	<apex:outputLabel value="Showing {!(OffsetSize)+1} - {!IF(totalRecs < (OffsetSize+LimitSize), totalRecs, (OffsetSize+LimitSize))} 0f {!totalRecs} Records" rendered="{!IF(requisitionList.size > 2, true, false)}" />
+                            	<apex:outputLabel value="Showing {!(OffsetSize)+1} - {!IF(totalRecs < (OffsetSize+LimitSize), totalRecs, (OffsetSize+LimitSize))} 0f {!totalRecs} Record" rendered="{!IF(requisitionList.size < 2, true, false)}" />
+                            	<center>
+                                    <apex:commandButton value="First Page" action="{!FirstPage}" disabled="{!prev}" status="statusBar" rendered="{!IF(requisitionList.size > 0, true, false)}" />
+                                	<apex:commandButton value="Previous" action="{!previous}" disabled="{!prev}" status="statusBar" rendered="{!IF(requisitionList.size > 0, true, false)}" />
+                                	<apex:commandButton value="Next" action="{!next}" disabled="{!Next}" status="statusBar" rendered="{!IF(requisitionList.size > 0, true, false)}" />
+                                	<apex:commandButton value="Last Page" action="{!LastPage}" disabled="{!Next}" status="statusBar" rendered="{!IF(requisitionList.size > 0, true, false)}" />
+                            	</center>
+                        	</div>
+                    	</apex:outputPanel>
+                	</div>
+            	</div>
+            	<center>
+                	<apex:commandButton value="{!$Label.JobSearchPage_Submit_Resume_Button}" status="statusBar" action="{!redirectCandidateResumePage}" styleClass="descBtn" rendered="{!requisitionList.size > 0}" />
+            	</center>
+            	<apex:outputPanel id="tstpopup">
+                	<apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!displayPopup==true}" />
+                	<apex:outputPanel styleClass="custPopup" layout="block" rendered="{!displayPopup==true}">
+                    	<center>
+                        	<apex:outputText value="A Job Description has not been uploaded for this position." rendered="{!AND(checkDefaultButton=='JobDescription',jobDescriptionList.size == 0)}"/>
+                        	<apex:outputPanel rendered="{!AND(checkDefaultButton=='JobDescription',jobDescriptionList.size > 0)}">
+                         		<apex:outputText value="A Job Description has not been uploaded for this position." rendered="{!jobDescriptionList[0].Description__c==''}"/>
+                        	</apex:outputPanel>
+                        	<apex:outputText value="A Benefit Package has not been uploaded for this position." rendered="{!AND(checkDefaultButton=='BenefitDescription',benefitPackageList.size == 0)}"/>
+                        	<apex:outputPanel rendered="{!AND(checkDefaultButton=='BenefitDescription',benefitPackageList.size > 0)}">
+                            	<apex:outputText value="A Benefit Package has not been uploaded for this position." rendered="{!benefitPackageList[0].Benefits_Description__c==''}"/>
+                        	</apex:outputPanel>
+                        	<apex:outputField value="{!jobDescriptionList[0].Description__c}" rendered="{!jobDescriptionList.size > 0}" />
+                        	<br />
+                        	<apex:outputField value="{!benefitPackageList[0].Benefits_Description__c}" rendered="{!benefitPackageList.size > 0}" />
+                        	<br /> <br />
+                        	<apex:commandButton value="{!$Label.Close_Button}" action="{!closePopup}" styleClass="comdBtn" />
+                    	</center>
+                	</apex:outputPanel>
+            	</apex:outputPanel>
+        	</div>
+    	</apex:form>
+	</body>
+	<script>
+	    function setReqId(reqId) {
+	        if (reqId != null) passRequIdToController(reqId);
+	    }
+
+	    if ('{!affiliateID}' != '') {
+	        window.history.pushState("object or string", "Title", "?affiliateID={!affiliateID}");
+	    }
+	</script>
+</apex:page>
