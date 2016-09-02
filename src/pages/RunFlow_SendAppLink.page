@@ -1,0 +1,5 @@
+<apex:page standardController="Candidate__c" >
+    <flow:interview name="SendAppFlow" finishLocation="/{!Candidate__c.Id}">
+        <apex:param name="vAppId" value="{!Candidate__c.Id}"/>
+    </flow:interview>
+</apex:page>

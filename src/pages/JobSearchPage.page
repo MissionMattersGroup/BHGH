@@ -134,12 +134,12 @@
                                         </apex:repeat>
                                         <td>
                                         	<apex:commandButton value="{!$Label.JobSearchPage_Show_Description_Button}" action="{!showJobDescription}" rerender="tstpopup" status="statusBar" styleClass="descBtn">
-                                            	<apex:param name="reqId" value="{!sObjRec.Job_Description__c}" assignTo="{!jobDescriptionId}" />
+                                            	<apex:param name="reqId" value="{!sObjRec.Job_Description__c}" assignTo="{!strJobDescId}" />
                                         	</apex:commandButton>
 										</td>
                                         <td>
                                             <apex:commandButton value="{!$Label.JobSearchPage_Show_Benefits_Button}" action="{!showBenefitPackage}" rerender="tstpopup" styleclass="descBtn" status="statusBar">
-                                                <apex:param name="reqId" value="{!sObjRec.Benefits_Package__c}" assignTo="{!benefitPackageId}" />
+                                                <apex:param name="reqId" value="{!sObjRec.Benefits_Package__c}" assignTo="{!strBenifitPackId}" />
                                             </apex:commandButton>
                                         </td>
                                     </tr>

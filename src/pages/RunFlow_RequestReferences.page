@@ -1,0 +1,10 @@
+<apex:page standardController="Reference__c" recordSetVar="References">
+
+    <apex:repeat value="{!Selected}" var="SelectedRow" rendered="false">
+        {!SelectedRow.Id} {!SelectedRow.Send_Reference_Form__c} {!SelectedRow.Application__c}
+    </apex:repeat>
+    <apex:variable var="Id" value="{!Selected[0].Id}"/>
+    <flow:interview name="Reference_Selection_Flow" finishLocation="{!URLFOR('/' +Selected[0].Application__c)}" >
+        <apex:param name="SelectedReferences" value="{!Selected}"/>
+    </flow:interview>
+</apex:page>

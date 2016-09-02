@@ -1,0 +1,108 @@
+<apex:page controller="SelectCandidateController" title="Selected Candidate">
+<apex:stylesheet value="{!URLFOR($Resource.SelectedCandidateStyle,'CssForSelectedCandidate/StatusStyleClass.css')}"/>
+    <apex:form id="form">
+        <apex:outputpanel >
+            <!-- Status Bar -->
+            <apex:actionStatus id="statusBar" layout="block">
+                <apex:facet name="start">
+                    <div id="assign-action-spinner-main">
+                        <div id="assign-action-spinner-content">
+                            <img src="/img/analytics/reportbuilder/icons/spinner32.gif"
+                                alt="Processing..." title="Processing..." />
+                            <p>Processing...</p>
+                        </div>
+                    </div>
+                </apex:facet>
+            </apex:actionStatus>
+            <!-- End of Status Bar -->
+        </apex:outputpanel>
+        <apex:pageBlock title="Candidate Details">
+            <apex:pageBlockTable id="table" value="{!lstCandidateWrp}"
+                var="objCan">
+                <apex:column headervalue="Select"><apex:facet name="header">
+                    <apex:inputCheckbox onclick="checkAll(this,'theCheckboxId')" id="theParentCheckboxId"
+                                        title="Select all rows" />
+                </apex:facet>
+                    <apex:inputCheckbox value="{!objCan.isSelected}" id="theCheckboxId" 
+                                                onclick="isAllCheckedStatus(this);" title="Select this row"/>
+                </apex:column>
+                <apex:repeat value="{!$ObjectType.Candidate__c.FieldSets.SelectCandidate}"
+                    var="field">
+                    <apex:column value="{!objCan.objCandidate[field]}"
+                        headerValue="{!field.label}" />
+                </apex:repeat>
+            </apex:pageBlockTable>
+
+            <apex:commandButton value="Conga Button"
+                action="{!getSelectedCandidateIds}"
+                oncomplete="openCongaUrl ('{!setOfCandidateIds}');"
+                status="statusBar" />
+        </apex:pageBlock>
+    </apex:form>
+    <script>
+        function openCongaUrl(setOfIds) {
+            if (setOfIds != null) {
+                var formatString = setOfIds.split(',');
+                var joinIds = formatString.join("'|'");
+                var removeSpace = joinIds.replace(" ", "");
+                var removeLeft = removeSpace.replace("[", "");
+                var removerRight = removeLeft.replace("]", "");
+                var finalSetIds = removerRight;
+                var congaUrl = // "{!CONGABASEURL}"+'{!$Api.Session_ID}'+
+                               //"{!SERVERURL}" + '{!$Api.Partner_Server_URL_290}'+
+                               //"{!REMAINURL}" + finalSetIds+ 
+                               //"{!CONGAQUERYID}"+ finalSetIds +
+                               //"{!CONGATEMPLATEID}";
+                'https://composer.congamerge.com?sessionId={!$Api.Session_ID}&serverUrl='+
+                          '{!$Api.Partner_Server_URL_90}&id={!requisitionId}+&QVar0Id={!$Label.QueryIdForCandidate}?pv0='
+                          + finalSetIds+
+                          '&QVar1Id={!$Label.QueryIdForAttachment}?pv1='+ finalSetIds +
+                          '&TemplateID={QVar1}';
+                alert(congaUrl);
+                window.open(congaUrl, "Conga",
+                                "width=700,height=550,menubar=0");
+            }
+
+        }
+        function checkAll(cb,cbid)
+        {
+            var inputElem = document.getElementsByTagName("input");
+            for(var i=0; i<inputElem.length; i++)
+            {
+                 if(inputElem[i].id.indexOf(cbid)!=-1){
+                    inputElem[i].checked = cb.checked;
+                }
+            }
+        }
+        function isAllCheckedStatus(cb) {
+        var inputElem = document.getElementsByTagName("input"); 
+        if(cb.checked == false) {
+            for(var i=0; i
+                <inputElem.length; i++) {
+                 if(inputElem[i].title.indexOf("Select all rows")!=-1) {
+                    inputElem[i].checked = false; 
+                } // End if
+            } // End for
+       }else{
+           var flag = true;
+            for(var i=0; i
+                    <inputElem.length; i++) {
+                if(inputElem[i].title.indexOf("Select this row")!=-1) {
+                    if(inputElem[i].checked == false) {
+                      flag = false;
+                    } // End if
+                } // End if
+            } // End for
+            for(var i=0; i
+                        <inputElem.length; i++) {
+                 if(inputElem[i].title.indexOf("Select all rows")!=-1) {
+                    if(flag == true){
+                      inputElem[i].checked = true;
+                    } // End if
+                } // End if
+            } // End for
+        } // End else
+     }// End method
+        
+    </script>
+</apex:page>

@@ -1,0 +1,93 @@
+<apex:page controller="CandidateResumeUploadController" extensions="BHGH_UploadResume" title="Candidate Validate"  sidebar="false" showHeader="false">
+
+    <apex:stylesheet value="{!URLFOR($Resource.SelectedCandidateStyle,'CssForSelectedCandidate/StatusStyleClass.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.CssForBHGH, 'BHGH/BHGH_Popup.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.CssForBHGH, 'BHGH/BHGH_CandidateUpload.css')}"/>
+
+    <apex:form >
+        <apex:outputpanel >
+            <apex:actionStatus id="statusBar" layout="block">
+                <apex:facet name="start">
+                    <div id="assign-action-spinner-main">
+                        <div id="assign-action-spinner-content">
+                            <img src="/img/analytics/reportbuilder/icons/spinner32.gif"
+                                alt="Processing..." title="Processing..." />
+                            <p>Processing...</p>
+                        </div>
+                    </div>
+                </apex:facet>
+            </apex:actionStatus>
+        </apex:outputpanel>
+
+        <center>
+            <div class="labelDiv">
+                <b>{!$Label.CandidateResumeUpload_title}</b>
+            </div>
+        </center>
+
+        <center>
+            <div class="innerPanel">
+                <apex:outputpanel id="pb">
+                    <apex:pageMessages id="showmsg" />
+                    <apex:panelGrid columns="2">
+                        <b><apex:outputLabel value="{!$Label.CandidateResumeUpload_First_Name}" for="ip1"/></b><apex:inputText value="{!firstName}" id="ip1"/>
+                        <b><apex:outputLabel value="{!$Label.CandidateResumeUpload_Last_Name}" for="ip2"/></b><apex:inputText value="{!lastName}" id="ip2"/>
+                        <b><apex:outputLabel value="{!$Label.CandidateResumeUpload_Email}" for="ip3"/></b><apex:inputText value="{!email}" id="ip3"/>
+                        <b><apex:outputLabel value="{!$Label.CandidateResumeUpload_EmailConfirm}" for="ip3"/></b><apex:inputText value="{!confirmEmail}" id="ip4"/>
+                        <b><apex:outputLabel value="{!$Label.CandidateResumeUpload_MailingStreet}" for="ip4"/></b><apex:inputText value="{!mailingStreet}" id="ip5"/>
+                        <b><apex:outputLabel value="{!$Label.CandidateResumeUpload_MailingCity}" for="ip4"/></b><apex:inputText value="{!mailingCity}" id="ip6"/>
+                        <b><apex:outputLabel value="{!$Label.CandidateResumeUpload_MailingState}" for="ip4"/></b><apex:inputText value="{!mailingState}" id="ip7"/>
+                        <b><apex:outputLabel value="{!$Label.CandidateResumeUpload_MailingZipCode}" for="ip4"/></b><apex:inputText value="{!mailingZip}" id="ip8"/>
+                        <b><apex:outputLabel value="{!$Label.HowDidYouHearAboutUsOnPage}" for="radioButton"/></b>
+                            <apex:selectList value="{!hearAboutUs}" id="radioButton" size="1" required="true" onchange="callTheOutputPanel();">
+                                <apex:selectOptions value="{!optionsType}"/>
+                            </apex:selectList>
+                        <apex:actionFunction name="callTheOutputPanel" rerender="hearAboutUsId,tstpopup,showmsg,pb" status="statusBar"/>
+                        <apex:outputpanel id="hearAboutUsId">
+                            <apex:outputpanel rendered="{!IF(hearAboutUs=='Advertisement',true, false)}">
+                                <b><apex:outputLabel value="{!$Label.CandidateResumeUpload_Advertisement}" for="adverID"/></b><br/>
+                                <apex:inputText value="{!hearAboutUs}" id="textValIdForAd"/>
+                            </apex:outputpanel>
+                            <apex:outputpanel rendered="{!IF(hearAboutUs=='Friend',true, false)}">
+                                 <b><apex:outputLabel value="{!$Label.CandidateResumeUpload_Friend}" for="friendID"/></b><br/>
+                                    <apex:inputText value="{!hearAboutUs}" id="textValIdForFriend"/>
+                            </apex:outputpanel>
+                        </apex:outputpanel>
+                    </apex:panelGrid>
+                    <apex:commandButton value="{!$Label.CandidateResumeUpload_Validate_Button}" action="{!validate}" rerender="tstpopup,showmsg,pb" status="statusBar"/>
+                </apex:outputpanel>
+            </div>
+        </center>
+
+        <apex:actionFunction name="RedirectToResumeUpload" action="{!RedirectToResumeUpload}"/>
+
+        <apex:outputPanel id="tstpopup">
+            <apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!displayPopup}" style="position:fixed"/>
+                <apex:outputPanel styleClass="custPopup" layout="block" rendered="{!displayPopup}" style="margin-top: -300px">
+                    <center>
+                        <apex:outputText value="{!$Label.CandidateResumeUpload_PopUp}"/><br/>
+                         <apex:selectRadio value="{!SelectedVal}" >
+                            <apex:actionSupport event="onchange" action="{!checkSelection}" rerender="pb,coverPopup,tstpopup" status="statusBar" >
+                                <apex:param name="contactId" value="{!candidateContactId}" assignTo="{!idConFromPopup}" />
+                                <apex:param name="reqIdPopup" value="{!SelectedVal}" assignTo="{!idFromPopup}" />
+                                <apex:param name="reqId" value="{!RequisitionId}" assignTo="{!RequisitionId}"/>
+                                <apex:param name="hearAboutUsTemp" value="{!hearAboutUs}" assignTo="{!HearAboutUs}"/>
+                                <apex:param name="hearAboutUsText" value="{!hearAboutUs}" assignTo="{!HearAboutUsText}"/>
+                            </apex:actionSupport>
+                            <apex:selectOptions value="{!Options}"/>
+                        </apex:selectRadio><br/>
+                    </center>
+                </apex:outputPanel>
+            </apex:outputPanel>
+    </apex:form>
+
+    <apex:outputPanel id="coverPopup">
+        <apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!displayPopupForCoverLetter}" style="position:fixed"/>
+            <apex:outputPanel styleClass="custPopup" layout="block" rendered="{!displayPopupForCoverLetter}" style="margin-top: -300px">
+                <center>
+                    <apex:include pageName="{!NextPageURL}"/>
+                </center>
+                <br/>
+            </apex:outputPanel>
+    </apex:outputPanel>
+</apex:page>

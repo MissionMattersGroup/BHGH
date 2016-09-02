@@ -61,6 +61,7 @@ public with sharing class TagManager_Test {
 			insert testTagValue;
 			Tag__c testTag = (Tag__c)SmartFactory.createSObject('Tag__c', true);
 			testTag.Individual__c = testContact.Id;
+			// testTag.Tag_Name__c = 'testSaveWithContact';
 			insert testTag;
 			TagManagerController testController = new TagManagerController(new ApexPages.StandardController(testTag));
 			TagManagerController.TempTag tt = new TagManagerController.TempTag(testTagValue);
@@ -102,6 +103,7 @@ public with sharing class TagManager_Test {
 			insert testTagValue;
 			Tag__c testTag = (Tag__c)SmartFactory.createSObject('Tag__c', true);
 			testTag.Organization__c = testAccount.Id;
+			// testTag.Tag_Name__c = 'testSaveWithContact';
 			insert testTag;
 			TagManagerController testController = new TagManagerController(new ApexPages.StandardController(testTag));
 			TagManagerController.TempTag tt = new TagManagerController.TempTag(testTagValue);

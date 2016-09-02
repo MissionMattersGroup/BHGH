@@ -1,0 +1,94 @@
+<apex:page controller="ResumeUploadController" title="Upload Resume" sidebar="false" showHeader="false">
+    <apex:stylesheet value="{!URLFOR($Resource.SelectedCandidateStyle,'CssForSelectedCandidate/StatusStyleClass.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.CssForBHGH, 'BHGH/BHGH_Popup.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.CssForBHGH, 'BHGH/BHGH_ResumeUpload.css')}"/>
+
+	<script type="text/javascript">
+	    // function buttonsEnabled(enabled) {
+	    //     var $buttons = jQuery('.btn');
+	    //     if (enabled === false) {
+	    //         $buttons.toggleClass('btnDisabled', true).attr('disabled', 'disabled');
+	    //     } else {
+	    //         $buttons.toggleClass('btnDisabled', false).attr('disabled', null);
+	    //     }
+	    // }
+
+	    // function submitUpload() {
+	    //     upload();
+	    //     // second, disable the buttons
+	    //     buttonsEnabled(false);
+	    //     // third, return false to prevent the click from
+	    //     // posting the form a second time
+	    //     return false;
+	    // }
+	</script>
+
+    <style>
+        .thankYou {
+            padding-left: 20px;
+            padding-right: 30px;
+            font-weight:bold;
+            font-size: initial;
+            font-family: serif;
+            padding-top: 40px;
+            text-align: center;
+            color: green;
+        }
+    </style>
+	<apex:pageBlock id="pageblock">
+		<apex:messages />
+		<apex:outputpanel >
+			<apex:actionStatus id="statusBar" layout="block">
+				<apex:facet name="start">
+					<div id="assign-action-spinner-main">
+						<div id="assign-action-spinner-content">
+							<img src="/img/analytics/reportbuilder/icons/spinner32.gif" alt="Uploading..." title="Uploading..." />
+							<p>Uploading...</p>
+						</div>
+					</div>
+				</apex:facet>
+				<apex:facet name="stop">
+					<apex:outputPanel id="thankYou" layout="block" rendered="{!NOT(showUpperPanel)}">
+						<apex:form >
+							<apex:outputText value="You have successfully submitted your resume and cover letter for the {!requisition.Name} requisition for {!affiliate.Name}" styleclass="thankYou"/><br />
+							<apex:commandButton value="{!$Label.BHGH_Return_To_JobSearchPage}" action="{!cancel}" />
+						</apex:form>
+					</apex:outputPanel>
+				</apex:facet>
+			</apex:actionStatus>
+		</apex:outputpanel>
+
+		<apex:pageblock tabStyle="contact" title="Resume and Cover Letter Upload" rendered="{!showUpperPanel}">
+			<div style="margin:0 auto; width:450px;">
+				<apex:form id="upload_form">
+					<apex:outputText value="*Please upload your resume file as a PDF or Word doc format." />
+					<div>
+						<p><apex:outputText value="Please attach your resume for the selected position." /><br/>
+				  	    	<apex:inputFile value="{!resume.Body}" filename="{!resume.Name}"/></p>
+					</div>
+					<div>
+	                	<p><apex:outputText value="Please attach your cover letter for the selected position." /><br/>
+	                    	<apex:inputFile value="{!coverletter.Body}" filename="{!coverletter.Name}" required="{!requisition.Require_Cover_Letter__c}" /></p>
+					</div>
+	                <div style="margin-top:15px;margin:0 auto;">
+						<apex:actionRegion immediate="true">
+						<p><apex:outputText style="font-weight:bold;" value="Please click the save button once to submit your resume."/></p>
+						<p>
+							<apex:commandButton action="{!checkIfProcessing}" value="Save" status="statusBar">
+								<apex:actionSupport event="onclick" rerender="pageblock" status="statusBar"/>
+							</apex:commandButton>
+	                        <apex:commandButton value="Cancel" action="{!cancel}"/>
+						</p>
+						</apex:actionRegion>
+	                </div>
+				</apex:form>
+			</div>
+		</apex:pageblock>
+
+		<script>
+			function setParam(){
+				console.log('{!affiliate.Id}');
+			}
+		</script>
+	</apex:pageBlock>
+</apex:page>

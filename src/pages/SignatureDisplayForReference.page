@@ -1,0 +1,15 @@
+<!--  Page used as the inline page to display the signature in an image format -->
+<apex:page standardController="Reference__c" >
+    <apex:form >
+    <style>
+    .styleForLabel{
+            font-size: 91% !important;
+            font-weight: bold  !important;
+           
+    }
+    </style>
+        <!-- Component in which the signature value [JSON value] is passed to show in image format -->
+        <div class="styleForLabel">{!$Label.LongSignatureForReference}</div>
+        <c:SignatureComponent componentValue="{!Reference__c.Application__r.Signature_URL_Long__c}"/>
+    </apex:form>
+</apex:page>
