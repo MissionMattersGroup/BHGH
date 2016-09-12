@@ -1,0 +1,4 @@
+<apex:component controller="AttachmentUtility" access="Global" selfClosing="true">
+    <apex:attribute name="cName" assignTo="{!candidateRecordName}" access="Global" type="String" description="Candidate Record Name"/>
+    <apex:outputText value="{!fileUrl}"/>  <apex:image url="{!fileUrl}"/>
+</apex:component>
