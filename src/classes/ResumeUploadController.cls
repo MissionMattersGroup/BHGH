@@ -1,6 +1,5 @@
 public class ResumeUploadController {
 
-	public String attachmentName { get; set; }
 	public Account affiliate { get; set; }
 	public Boolean showUpperPanel { get; set; }
 	public Id contactId { get; set; }
@@ -10,18 +9,19 @@ public class ResumeUploadController {
 	public String hearAboutUsText { get; set; }
 	public Requisition__c requisition { get; set; }
 	public String errorMessage { get; set; }
-	public Boolean displayErrorMessage { get; set; }
-	public static Blob resumeBody { get; set; }
-	public String resumeName { get; set; }
-	public Blob coverletterBody { get; set; }
-	public String coverletterName { get; set; }
 	public Attachment resume { get; set; }
 	public Attachment coverletter { get; set; }
 	public Boolean isProcessingString { get; set; }
+	public Boolean missingResume { get; set; }
+	public Boolean missingCoverletter { get; set; }
+	public Boolean isSubmitted { get; set; }
 
 	public ResumeUploadController() {
 		errorMessage = '';
 		isProcessingString = false;
+		missingResume = false;
+		missingCoverletter = false;
+		isSubmitted = false;
 		resume = new Attachment();
 		coverletter = new Attachment();
 		affiliateId = ApexPages.currentPage().getParameters().get('affiliateId');
@@ -29,18 +29,12 @@ public class ResumeUploadController {
 		selectedOption = ApexPages.currentPage().getParameters().get('selectedVal');
 		hearAboutUs = ApexPages.currentPage().getParameters().get('hearAboutUs');
 		hearAboutUsText = ApexPages.currentPage().getParameters().get('hearAboutUsText');
-		displayErrorMessage = false;
 		showUpperPanel = true;
-		if(String.isNotBlank(affiliateId)) {
-			affiliate = [SELECT Id, Name FROM Account WHERE Id = :affiliateId];
-		}
-		if(String.isNotBlank(ApexPages.currentPage().getParameters().get('requisitionId'))) {
-			requisition = [SELECT Id, Name, Affiliate_Name__c, Require_Cover_Letter__c FROM Requisition__c WHERE Id = :ApexPages.currentPage().getParameters().get('requisitionId')];
-		}
+		if(String.isNotBlank(affiliateId)) affiliate = [SELECT Id, Name FROM Account WHERE Id = :affiliateId];
+		if(String.isNotBlank(ApexPages.currentPage().getParameters().get('requisitionId'))) requisition = [SELECT Id, Name, Affiliate_Name__c, Require_Cover_Letter__c FROM Requisition__c WHERE Id = :ApexPages.currentPage().getParameters().get('requisitionId')];
 	}
 
 	public void checkIfProcessing() {
-		showUpperPanel = false;
 		if(!isProcessingString) {
 			isProcessingString = true;
 			save();
@@ -48,10 +42,17 @@ public class ResumeUploadController {
 	}
 
 	public PageReference save() {
+		missingResume = false;
+		missingCoverletter = false;
 		List<Attachment> attachmentList = new List<Attachment>();
-		displayErrorMessage = (String.isNotBlank(selectedOption) && selectedOption.EqualsIgnoreCase(System.Label.BHGH_Upload_New_Version_Resume)) ? !validateAttachments() : false;
-		if(displayErrorMessage) return null;
-		if(requisition.Require_Cover_Letter__c) {
+		String errorMessages = getErrorMessages();
+		if(String.isNotBlank(errorMessages)) {
+			showUpperPanel = true;
+			isProcessingString = false;
+			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, errorMessages));
+			return null;
+		}
+		if(String.isNotBlank(String.valueOf(coverletter.Body))) {
 			coverletter.ParentId = contactId;
 			attachmentList.add(coverletter);
 		}
@@ -62,12 +63,22 @@ public class ResumeUploadController {
 		candidate.RecordTypeId = Schema.SObjectType.Candidate__c.getRecordTypeInfosByName().get('1. Resume Only').getRecordTypeId();
 		try {
 			insert attachmentList;
-			insert candidate;
 		} catch(DmlException e) {
 			showUpperPanel = true;
-			ApexPages.addMessage(new ApexPages.message(ApexPages.severity.ERROR, e.getMessage()));
+			isProcessingString = false;
+			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'There was a problem adding your attachment:  ' + e.getMessage()));
 			return null;
 		}
+		try {
+			insert candidate;
+		} catch(DmlException e) {
+			isSubmitted = false;
+			showUpperPanel = true;
+			isProcessingString = false;
+			ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, e.getMessage()));
+			return null;
+		}
+		isSubmitted = true;
 		PageReference pageReg = Page.JobSearchPage;
 		pageReg.getParameters().put('affiliateId', affiliateId);
 		pageReg.setRedirect(true);
@@ -78,15 +89,16 @@ public class ResumeUploadController {
 		return Page.JobSearchPage;
 	}
 
-	public Boolean validateAttachments() {
-		if(resume == null) {
-			errorMessage = 'Please include a resume file.';
-			return false;
+	public String getErrorMessages() {
+		String erroMessages = '';
+		if(String.isBlank(String.valueOf(resume.Body))) {
+			erroMessages += 'Please include a resume file.\n';
+			missingResume = true;
 		}
-		if(requisition.Require_Cover_Letter__c && (coverletter == null)) {
-			errorMessage = 'The selected position requires a cover letter.';
-			return false;
+		if(requisition.Require_Cover_Letter__c && String.isBlank(String.valueOf(coverletter.Body))) {
+			erroMessages += 'The selected position requires a cover letter.';
+			missingCoverletter = true;
 		}
-		return true;
+		return erroMessages;
 	}
 }

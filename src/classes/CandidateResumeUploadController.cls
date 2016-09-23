@@ -34,8 +34,7 @@ public with sharing class CandidateResumeUploadController{
 		Schema.sObjectType sobjectType = Candidate__c.getSObjectType();
 		Schema.DescribeSObjectResult sobjectDescribe = sobjectType.getDescribe();
 		Map<String, Schema.SObjectField> mapOfFields = sobjectDescribe.fields.getMap();
-		List<Schema.PicklistEntry> pickListValues = mapOfFields.get(System.Label.HowDidYouHearAboutUs)
-		.getDescribe().getPickListValues();
+		List<Schema.PicklistEntry> pickListValues = mapOfFields.get(System.Label.HowDidYouHearAboutUs).getDescribe().getPickListValues();
 		optionsType = new List<SelectOption>();
 		for(Schema.PicklistEntry pickListObj : pickListValues) {
 			optionsType.add(new SelectOption(pickListObj.getLabel(), pickListObj.getValue()));
@@ -59,55 +58,40 @@ public with sharing class CandidateResumeUploadController{
 		if(String.isNotBlank(firstName) && String.isNotBlank(lastName) && String.isNotBlank(email) && String.isNotBlank(mailingStreet) && String.isNotBlank(mailingCity) && String.isNotBlank(mailingState) && String.isNotBlank(mailingZip) && String.isNotBlank(hearAboutUs)) {
 			if(String.isBlank(hearAboutUsText) && System.Label.CandidateResumeUpload_FilterTextArea.containsIgnoreCase(hearAboutUs)) {
 				ApexPages.addmessage(new ApexPages.Message(ApexPages.Severity.ERROR, System.Label.CandidateResumeUpload_ErrorIfAdverFriendTextBlank));
-				return null;
-			}
-			if(!confirmEmail.equalsIgnoreCase(email)) {
+			} else if(!confirmEmail.equalsIgnoreCase(email)) {
 				ApexPages.addmessage(new ApexPages.Message(ApexPages.Severity.ERROR, Label.ErrorMessageForEmailOnCandidateUpload));
 			} else if(validateEmail(email)) {
-				for(Contact c : [SELECT Id, Name, (SELECT Id FROM Attachments) FROM Contact WHERE FirstName = :firstName AND LastName = :lastName AND Email = :email LIMIT 1]) {
-					objCon = c;
+				List<Contact> contactList = [SELECT Id, FirstName, LastName, Name, Email, MailingStreet, MailingCity, MailingState, MailingPostalCode FROM Contact WHERE Email = :email];
+				if(!contactList.isEmpty()) {
+					objCon = contactList[0];
 					objCon.MailingStreet = mailingStreet;
 					objCon.MailingCity = mailingCity;
 					objCon.MailingState = mailingState;
 					objCon.MailingPostalCode = mailingZip;
-				}
-				if(String.isNotBlank(objCon.Id)) {
-					update objCon;
-					attachmentList = new List<Attachment>();
-					for(Attachment a : [SELECT Id, ParentId, Body, Name FROM Attachment WHERE ParentId = :objCon.Id]) {
-						attachmentList.add(a);
-						if(a.Name.containsIgnoreCase(System.Label.Resume)) {
-							displayPopup = isPopupShown;
-						}
-						if(!displayPopup) {
-							selectedVal = System.Label.BHGH_Upload_New_Version_Resume;
-							return redirectToResumeUpload();
-						}
+					try {
+						update objCon;
+					} catch(DmlException e) {
+						ApexPages.addmessage(new ApexPages.Message(ApexPages.Severity.ERROR, e.getMessage()));
+						return null;
 					}
-					selectedVal = System.Label.BHGH_Upload_New_Version_Resume;
 					return redirectToResumeUpload();
 				} else {
-					objCon = new Contact(FirstName = firstName);
-					objCon.LastName = lastName;
-					objCon.Email = email;
-					objCon.MailingStreet = mailingStreet;
-					objCon.MailingCity = mailingCity;
-					objCon.MailingState = mailingState;
-					objCon.MailingPostalCode = mailingZip;
-					insert objCon;
+					try {
+						objCon = new Contact(RecordTypeId = [SELECT Id FROM RecordType WHERE Name = 'General' AND SObjectType = 'Contact' LIMIT 1].Id, FirstName = firstName, LastName = lastName, Email = email, MailingStreet = mailingStreet, MailingCity = mailingCity, MailingState = mailingState, MailingPostalCode = mailingZip);
+						insert objCon;
+					} catch(DmlException e) {
+						ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, e.getMessage()));
+						return null;
+					}
 					selectedVal = System.Label.BHGH_Upload_New_Version_Resume;
 					return redirectToResumeUpload();
 				}
 			} else {
-				ApexPages.addmessage(new ApexPages.Message(ApexPages.Severity.Warning,
-				Label.CandidateResumeUpload_AppropriateEmailAddress));
+				ApexPages.addmessage(new ApexPages.Message(ApexPages.Severity.Warning, Label.CandidateResumeUpload_AppropriateEmailAddress));
 			}
 		} else {
-			ApexPages.addmessage(new ApexPages.Message(ApexPages.Severity.Warning,
-			Label.CandidateResumeUpload_FillDetails));
+			ApexPages.addmessage(new ApexPages.Message(ApexPages.Severity.Warning, Label.CandidateResumeUpload_FillDetails));
 		}
-		attachmentList.clear();
-		attachmentList = new List<Attachment>();
 		return null;
 	}
 
@@ -134,7 +118,7 @@ public with sharing class CandidateResumeUploadController{
 				if(!displayPopupForCoverLetter) ApexPages.addmessage(new ApexPages.message(ApexPages.severity.CONFIRM, Label.Successful_Application_For_Job));
 			}
 		} else {
-			return RedirectToResumeUpload();
+			return redirectToResumeUpload();
 		}
 		return null;
 	}
@@ -144,7 +128,7 @@ public with sharing class CandidateResumeUploadController{
 		displayPopup = false;
 	}
 
-	public PageReference RedirectToResumeUpload() {
+	public PageReference redirectToResumeUpload() {
 		PageReference pageRef = Page.ResumeUpload;
 		pageRef.getParameters().put('contactId', objCon.Id);
 		pageRef.getParameters().put('affiliateId', affiliateId);

@@ -37,13 +37,37 @@ public with sharing class ResumeUploadTest {
 		}
 	}
 
-	static testmethod void testSave() {
+	@isTest
+	static void testSave() {
 		Test.startTest();
 		TestFactory factory = new TestFactory();
 		Test.setCurrentPage(factory.getTestPr(false));
 		ResumeUploadController testController = new ResumeUploadController();
+		testController.requisition = factory.getTestReq(false);
+		testController.selectedOption = '';
 		testController.resume = (Attachment)SmartFactory.createSobject('Attachment');
+		testController.resume.Body = Blob.valueOf('test string');
 		testController.checkIfProcessing();
+		Test.stopTest();
+	}
+
+	@isTest
+	static void testInvalidAttachments() {
+		Test.startTest();
+		TestFactory factory = new TestFactory();
+		Test.setCurrentPage(factory.getTestPr(false));
+		ResumeUploadController testController = new ResumeUploadController();
+		testController.checkIfProcessing();
+		Test.stopTest();
+	}
+
+	@isTest
+	static void testCancel() {
+		Test.startTest();
+		TestFactory factory = new TestFactory();
+		Test.setCurrentPage(factory.getTestPr(false));
+		ResumeUploadController testController = new ResumeUploadController();
+		testController.cancel();
 		Test.stopTest();
 	}
 }
