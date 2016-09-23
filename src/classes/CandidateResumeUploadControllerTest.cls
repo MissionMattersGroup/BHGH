@@ -187,38 +187,24 @@ private class CandidateResumeUploadControllerTest {
 		system.assert(pageRefs.geturl().containsIgnoreCase('resumeupload'));
 	}
 
-	//test normal flow on page
 	static testMethod void testValidate() {
-
-		list<Requisition__c> listRequisition = [Select id, Stage__c, Subcategory__c
-		From   Requisition__c
-		Where  Stage__c = 'Open' And
-		Subcategory__c ='Active - Posting, advertising, accepting resumes'];
-
-		PageReference pageRef = Page.CandidateResumeUpload;
-		pageRef.getParameters().put('id',listRequisition[0].id);
-		Test.setCurrentPage(pageRef);
-
-		CandidateResumeUploadController objCand = new CandidateResumeUploadController();
-		objCand.firstName = 'First Contact';
-		objCand.lastName  = 'Contact';
-		objCand.email     = 'Test@email.com';
-		objCand.confirmEmail = 'Test@email.com';
-		objCand.mailingStreet = 'AAA';
-		objCand.mailingCity = 'Pune';
-		objCand.mailingState = 'MH';
-		objCand.mailingZip = '000001';
-		objCand.hearAboutUs = 'Email';
 		Test.startTest();
-		objCand.validate();
-		Test.stoptest();
-
-		list<Contact> listContact = [Select id, LastName, FirstName, Email, AccountId
-		From   Contact
-		Where  FirstName = 'First Contact' And
-		LastName = 'Contact' And
-		Email = 'Test@email.com'];
-		system.assertEquals('First Contact',listContact[0].FirstName);
+		PageReference pageRef = Page.CandidateResumeUpload;
+		pageRef.getParameters().put('id',[SELECT Id FROM Requisition__c WHERE Stage__c = 'Open' AND Subcategory__c ='Active - Posting, advertising, accepting resumes' LIMIT 1].Id);
+		Test.setCurrentPage(pageRef);
+		CandidateResumeUploadController testController = new CandidateResumeUploadController();
+		testController.firstName = 'testValidate';
+		testController.lastName  = 'Contact';
+		testController.email     = 'testValidate@testValidate.com';
+		testController.confirmEmail = 'testValidate@testValidate.com';
+		testController.mailingStreet = 'AAA';
+		testController.mailingCity = 'Pune';
+		testController.mailingState = 'MH';
+		testController.mailingZip = '000001';
+		testController.hearAboutUs = 'Email';
+		testController.validate();
+		System.assert(![SELECT Id, LastName, FirstName, Email, AccountId From Contact Where Email = 'Test@email.com'].isEmpty());
+		Test.stopTest();
 	}
 
 	//test with inappropriate email
