@@ -5,7 +5,14 @@ public class CandidateTriggerHandler {
     }
 
     public static void onAfterUpdate(Map<Id, Candidate__c> newMap, Map<Id, Candidate__c> oldMap) {
-        Map<Id, String> signatureUrlByCandidateIdMap = generateSignatureFromBase64(newMap);
+		Map<Id, String> signatureUrlByCandidateIdMap = generateSignatureFromBase64(newMap);
+		Map<Id, Candidate__c> candidateSignatureChangedMap = new Map<Id, Candidate__c>();
+		for(Id cId : newMap.keySet()) {
+			if(newMap.get(cId).Signature_URL_Long__c != oldMap.get(cId).Signature_URL_Long__c) {
+            	candidateSignatureChangedMap.put(cId, newMap.get(cId));
+		 	}
+		}
+		if(!candidateSignatureChangedMap.isEmpty()) generateSignatureFromBase64(candidateSignatureChangedMap);
     }
 
     public void onBeforeUpdate(List<Candidate__c> newList, Map<Id, Candidate__c> oldMap) {
@@ -17,11 +24,12 @@ public class CandidateTriggerHandler {
     }
 
     private void updateSignatureUrl(Map<String, Candidate__c> candidateByRecordNameMap, List<Candidate__c> newList) {
+        String baseUrl = Url.getSalesforceBaseUrl().toExternalForm() + '/servlet/servlet.ImageServer?oid=' + [SELECT Id FROM Organization LIMIT 1].Id + '&id=';
 		Map<String, Document> documentByCandidateRecordNameMap = new Map<String, Document>();
 		for(Document d : [SELECT Id, Name FROM Document WHERE Name IN :candidateByRecordNameMap.keySet()]) documentByCandidateRecordNameMap.put(d.Name, d);
         for(String cName : candidateByRecordNameMap.keySet()) {
 			Candidate__c c = candidateByRecordNameMap.get(cName);
-            c.Signature_URL__c = documentByCandidateRecordNameMap.get(cName).Id;
+			if(documentByCandidateRecordNameMap.containsKey(cName) && candidateByRecordNameMap.containsKey(cName)) c.Signature_URL__c = baseUrl + documentByCandidateRecordNameMap.get(cName).Id;
         }
     }
 
